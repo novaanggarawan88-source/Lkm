@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LKM DIGITAL PJOK - SMA Negeri 1 Tejakula</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; }
+  </style>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen flex flex-col">
+  <!-- Header -->
+  <header class="sticky top-0 z-40 bg-white/95 backdrop-blur-md border-b border-slate-200">
+    <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+      <div class="flex items-center gap-3">
+        <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-700 to-emerald-600 flex items-center justify-center text-white font-black text-sm">
+          PJOK
+        </div>
+        <div>
+          <h1 class="font-black text-slate-900 text-base leading-tight">LKM DIGITAL PJOK</h1>
+          <p class="text-xs text-slate-500 font-medium">SMA Negeri 1 Tejakula • Guru: I Ketut Agus Nova Anggarawan, S.Pd.</p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <button id="btnRoleStudent" onclick="switchView('student')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-blue-600 text-white">Murid</button>
+        <button id="btnRoleTeacher" onclick="switchView('teacher')" class="px-3 py-1.5 rounded-lg text-xs font-bold bg-slate-100 text-slate-700">Guru</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main id="appContent" class="flex-1 max-w-4xl w-full mx-auto px-4 py-6">
+    <!-- View 1: Beranda Murid -->
+    <div id="viewHome" class="space-y-6">
+      <div class="bg-gradient-to-br from-blue-900 via-blue-800 to-emerald-900 rounded-3xl p-8 text-white shadow-xl">
+        <span class="inline-block px-3 py-1 rounded-full bg-white/10 text-emerald-300 text-xs font-bold mb-4">Lembar Kerja Murid Digital PJOK</span>
+        <h2 class="text-3xl font-black mb-2">LKM DIGITAL PJOK</h2>
+        <p class="text-lg text-emerald-200 font-medium mb-6">Belajar Aktif, Berpikir Kritis, dan Refleksi Diri</p>
+        <button onclick="showIdentityView()" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-emerald-500 to-teal-400 text-slate-950 font-black text-sm shadow-lg hover:brightness-105">
+          MULAI MENGERJAKAN LKM
+        </button>
+      </div>
+    </div>
+
+    <!-- View 2: Identitas Murid -->
+    <div id="viewIdentity" class="hidden bg-white rounded-3xl p-8 border border-slate-200 shadow-md space-y-5">
+      <h3 class="text-xl font-black text-slate-900">IDENTITAS MURID</h3>
+      <p class="text-xs text-slate-500">Pilih kelas dan nama Anda sesuai data Google Spreadsheet.</p>
+      <div class="space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Kelas</label>
+          <select id="selectKelas" onchange="onClassSelected()" class="w-full p-3 rounded-xl border border-slate-300 text-sm font-semibold">
+            <option value="">-- Pilih Kelas --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Nama Murid</label>
+          <select id="selectNama" class="w-full p-3 rounded-xl border border-slate-300 text-sm font-semibold">
+            <option value="">-- Pilih Nama --</option>
+          </select>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Pilih Materi LKM</label>
+          <select id="selectLkm" class="w-full p-3 rounded-xl border border-slate-300 text-sm font-semibold">
+            <option value="">-- Pilih LKM --</option>
+          </select>
+        </div>
+        <button onclick="startLkmExam()" class="w-full py-3.5 rounded-xl bg-blue-600 text-white font-bold text-sm hover:bg-blue-700 shadow-md">
+          MULAI LKM
+        </button>
+      </div>
+    </div>
+
+    <!-- View 3: Pengerjaan LKM -->
+    <div id="viewWorksheet" class="hidden space-y-4">
+      <div class="bg-white rounded-2xl p-4 border border-slate-200 flex items-center justify-between">
+        <h4 id="worksheetTitle" class="font-extrabold text-sm text-slate-900">LKM Kebugaran Jasmani</h4>
+        <span id="worksheetProgress" class="text-xs font-bold text-blue-700">Soal 1 dari 20</span>
+      </div>
+
+      <div class="bg-white rounded-3xl p-6 border border-slate-200 shadow-md space-y-4">
+        <div id="questionContainer" class="space-y-4">
+          <!-- Dynamic Question Content -->
+        </div>
+
+        <div class="flex items-center justify-between pt-4 border-t border-slate-100">
+          <button id="btnPrev" onclick="navigateQuestion(-1)" class="px-4 py-2 rounded-xl border border-slate-300 text-xs font-bold">SEBELUMNYA</button>
+          <button id="btnNext" onclick="navigateQuestion(1)" class="px-4 py-2 rounded-xl bg-blue-600 text-white text-xs font-bold">SELANJUTNYA</button>
+          <button id="btnSubmit" onclick="confirmSubmitAnswers()" class="hidden px-5 py-2 rounded-xl bg-emerald-600 text-white text-xs font-bold">KUMPULKAN JAWABAN</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- View 4: Halaman Hasil -->
+    <div id="viewResult" class="hidden space-y-6">
+      <div class="bg-gradient-to-r from-blue-700 to-emerald-700 rounded-3xl p-6 text-white shadow-xl">
+        <h3 class="text-2xl font-black">HASIL LKM DIGITAL PJOK</h3>
+        <p id="resultMeta" class="text-xs text-emerald-200 mt-1"></p>
+      </div>
+
+      <div class="grid grid-cols-4 gap-3 text-center">
+        <div class="bg-white p-4 rounded-2xl border border-blue-200 shadow-xs">
+          <span class="text-[10px] text-slate-400 font-bold block">NILAI AKHIR</span>
+          <span id="resNilai" class="text-4xl font-black text-blue-700">0</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-emerald-200 shadow-xs">
+          <span class="text-[10px] text-emerald-700 font-bold block">BENAR</span>
+          <span id="resBenar" class="text-4xl font-black text-emerald-600">0</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-rose-200 shadow-xs">
+          <span class="text-[10px] text-rose-700 font-bold block">SALAH</span>
+          <span id="resSalah" class="text-4xl font-black text-rose-600">0</span>
+        </div>
+        <div class="bg-white p-4 rounded-2xl border border-slate-200 shadow-xs">
+          <span class="text-[10px] text-slate-500 font-bold block">TOTAL SOAL</span>
+          <span id="resTotal" class="text-4xl font-black text-slate-800">0</span>
+        </div>
+      </div>
+
+      <div class="bg-white p-6 rounded-3xl border border-slate-200 shadow-xs space-y-2">
+        <h4 class="font-extrabold text-sm text-slate-900">Umpan Balik Otomatis:</h4>
+        <p id="resFeedback" class="text-xs sm:text-sm text-slate-700 p-4 bg-blue-50 rounded-2xl leading-relaxed italic"></p>
+      </div>
+
+      <button onclick="showReflectionView()" class="w-full py-3.5 rounded-2xl bg-emerald-600 text-white font-extrabold text-sm hover:bg-emerald-700 shadow-md">
+        LANJUTKAN KE LEMBAR REFLEKSI MURID
+      </button>
+    </div>
+
+    <!-- View 5: Refleksi Murid -->
+    <div id="viewReflection" class="hidden bg-white rounded-3xl p-8 border border-slate-200 shadow-md space-y-4">
+      <h3 class="text-xl font-black text-slate-900">LEMBAR REFLEKSI DIRI</h3>
+      <div class="space-y-3">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">1. Apa hal baru yang kamu pelajari hari ini?</label>
+          <textarea id="refHalBaru" rows="2" class="w-full p-3 rounded-xl border border-slate-300 text-xs"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">2. Bagian materi apa yang masih sulit kamu pahami?</label>
+          <textarea id="refMateriSulit" rows="2" class="w-full p-3 rounded-xl border border-slate-300 text-xs"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">3. Apa penyebab kamu kesulitan menjawab soal tersebut?</label>
+          <textarea id="refPenyebab" rows="2" class="w-full p-3 rounded-xl border border-slate-300 text-xs"></textarea>
+        </div>
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">4. Apa yang akan kamu lakukan untuk meningkatkan pemahamanmu?</label>
+          <textarea id="refRencana" rows="2" class="w-full p-3 rounded-xl border border-slate-300 text-xs"></textarea>
+        </div>
+        <button onclick="submitStudentReflection()" class="w-full py-3.5 rounded-xl bg-emerald-600 text-white font-bold text-xs hover:bg-emerald-700">
+          SIMPAN REFLEKSI KE SPREADSHEET
+        </button>
+      </div>
+    </div>
+
+    <!-- View 6: Dashboard Guru -->
+    <div id="viewTeacher" class="hidden space-y-6">
+      <div class="bg-slate-900 rounded-3xl p-6 text-white shadow-xl">
+        <h3 class="text-xl font-black">Dashboard Guru PJOK</h3>
+        <p class="text-xs text-slate-400">Guru Pengampu: I Ketut Agus Nova Anggarawan, S.Pd.</p>
+      </div>
+      <div id="teacherContent" class="text-xs text-slate-600">
+        Memuat data rekap dari Google Spreadsheet...
+      </div>
+    </div>
+  </main>
+
+  <footer class="mt-auto bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-400">
+    LKM DIGITAL PJOK • SMA NEGERI 1 TEJAKULA • Single Source of Truth: Google Spreadsheet
+  </footer>
+
+  <script>
+    var globalData = { students: [], kelasList: [], lkms: [] };
+    var currentStudent = null;
+    var currentLkm = null;
+    var currentQuestions = [];
+    var currentIndex = 0;
+    var studentAnswers = {};
+    var lastSubmissionResult = null;
+
+    window.onload = function() {
+      // Ambil data awal via google.script.run jika berjalan di Apps Script
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(data) {
+            globalData = data;
+            initSelectOptions();
+          })
+          .getInitialData();
+      } else {
+        // Fallback demo data
+        initSelectOptions();
+      }
+    };
+
+    function initSelectOptions() {
+      var selK = document.getElementById('selectKelas');
+      selK.innerHTML = '<option value="">-- Pilih Kelas --</option>';
+      (globalData.kelasList || ['XI 1', 'XI 2', 'XI 3']).forEach(function(c) {
+        selK.innerHTML += '<option value="' + c + '">Kelas ' + c + '</option>';
+      });
+
+      var selL = document.getElementById('selectLkm');
+      selL.innerHTML = '<option value="">-- Pilih LKM --</option>';
+      (globalData.lkms || [{ id: 'LKM-KBG-01', judul: 'LKM Kebugaran Jasmani' }]).forEach(function(l) {
+        selL.innerHTML += '<option value="' + l.id + '">' + l.judul + '</option>';
+      });
+    }
+
+    function onClassSelected() {
+      var cls = document.getElementById('selectKelas').value;
+      var selN = document.getElementById('selectNama');
+      selN.innerHTML = '<option value="">-- Pilih Nama Murid --</option>';
+      var filtered = (globalData.students || []).filter(function(s) { return s.kelas === cls; });
+      filtered.forEach(function(s) {
+        selN.innerHTML += '<option value="' + s.nis + '">' + s.nama + ' (' + s.nis + ')</option>';
+      });
+    }
+
+    function showIdentityView() {
+      hideAllViews();
+      document.getElementById('viewIdentity').classList.remove('hidden');
+    }
+
+    function startLkmExam() {
+      var nis = document.getElementById('selectNama').value;
+      var lkmId = document.getElementById('selectLkm').value;
+      if (!nis || !lkmId) {
+        alert('Silakan pilih kelas, nama murid, dan LKM terlebih dahulu.');
+        return;
+      }
+      currentStudent = globalData.students.find(function(s) { return s.nis === nis; });
+      currentLkm = globalData.lkms.find(function(l) { return l.id === lkmId; });
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(qList) {
+            currentQuestions = qList;
+            currentIndex = 0;
+            studentAnswers = {};
+            hideAllViews();
+            document.getElementById('viewWorksheet').classList.remove('hidden');
+            renderQuestion();
+          })
+          .getQuestionsForStudent(lkmId);
+      }
+    }
+
+    function renderQuestion() {
+      var q = currentQuestions[currentIndex];
+      if (!q) return;
+      document.getElementById('worksheetProgress').innerText = 'Soal ' + (currentIndex + 1) + ' dari ' + currentQuestions.length;
+      var c = document.getElementById('questionContainer');
+      var html = '<h5 class="text-sm font-bold text-slate-800">' + (currentIndex + 1) + '. ' + q.pertanyaan + '</h5><div class="space-y-2 mt-3">';
+      
+      ['A', 'B', 'C', 'D', 'E'].forEach(function(opt) {
+        var text = q['opsi' + opt];
+        if (text) {
+          var checked = studentAnswers[q.id] === opt ? 'bg-blue-100 border-blue-600 font-bold' : 'bg-slate-50 border-slate-200';
+          html += '<div onclick="chooseAnswer(\'' + q.id + '\', \'' + opt + '\')" class="p-3 rounded-xl border cursor-pointer ' + checked + '">' + opt + '. ' + text + '</div>';
+        }
+      });
+      html += '</div>';
+      c.innerHTML = html;
+
+      document.getElementById('btnPrev').disabled = currentIndex === 0;
+      var isLast = currentIndex === currentQuestions.length - 1;
+      document.getElementById('btnNext').classList.toggle('hidden', isLast);
+      document.getElementById('btnSubmit').classList.toggle('hidden', !isLast);
+    }
+
+    function chooseAnswer(qId, val) {
+      studentAnswers[qId] = val;
+      renderQuestion();
+    }
+
+    function navigateQuestion(offset) {
+      currentIndex += offset;
+      renderQuestion();
+    }
+
+    function confirmSubmitAnswers() {
+      if (!confirm('Apakah Anda yakin ingin mengumpulkan jawaban?')) return;
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function(res) {
+            lastSubmissionResult = res;
+            showResultView(res);
+          })
+          .submitAnswers({
+            namaMurid: currentStudent.nama,
+            kelas: currentStudent.kelas,
+            nis: currentStudent.nis,
+            lkmId: currentLkm.id,
+            materi: currentLkm.materi,
+            jawabanPerSoal: studentAnswers
+          });
+      }
+    }
+
+    function showResultView(res) {
+      hideAllViews();
+      document.getElementById('viewResult').classList.remove('hidden');
+      document.getElementById('resultMeta').innerText = res.namaMurid + ' • ' + res.kelas + ' • ' + res.materi;
+      document.getElementById('resNilai').innerText = res.nilaiAkhir;
+      document.getElementById('resBenar').innerText = res.benar;
+      document.getElementById('resSalah').innerText = res.salah;
+      document.getElementById('resTotal').innerText = res.totalSoal;
+      document.getElementById('resFeedback').innerText = res.umpanBalik;
+    }
+
+    function showReflectionView() {
+      hideAllViews();
+      document.getElementById('viewReflection').classList.remove('hidden');
+    }
+
+    function submitStudentReflection() {
+      var p = {
+        submissionId: lastSubmissionResult ? lastSubmissionResult.id : 'OFFLINE',
+        namaMurid: currentStudent ? currentStudent.nama : 'Murid',
+        kelas: currentStudent ? currentStudent.kelas : 'XI 1',
+        lkmId: currentLkm ? currentLkm.id : 'LKM-KBG-01',
+        materi: currentLkm ? currentLkm.materi : 'Kebugaran Jasmani',
+        halBaru: document.getElementById('refHalBaru').value,
+        materiSulit: document.getElementById('refMateriSulit').value,
+        penyebabKesulitan: document.getElementById('refPenyebab').value,
+        rencanaPeningkatan: document.getElementById('refRencana').value
+      };
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run
+          .withSuccessHandler(function() {
+            alert('Refleksi Anda berhasil disimpan ke Google Spreadsheet!');
+            hideAllViews();
+            document.getElementById('viewHome').classList.remove('hidden');
+          })
+          .saveReflection(p);
+      }
+    }
+
+    function switchView(mode) {
+      hideAllViews();
+      if (mode === 'student') {
+        document.getElementById('viewHome').classList.remove('hidden');
+      } else {
+        document.getElementById('viewTeacher').classList.remove('hidden');
+        if (typeof google !== 'undefined' && google.script && google.script.run) {
+          google.script.run
+            .withSuccessHandler(function(tData) {
+              document.getElementById('teacherContent').innerHTML =
+                '<div class="p-4 bg-white rounded-2xl border border-slate-200">' +
+                '<h4 class="font-bold">Rata-Rata Nilai: ' + tData.rataRata + '</h4>' +
+                '<p>Total Siswa Mengerjakan: ' + tData.sudahMengerjakan + ' dari ' + tData.totalMurid + '</p>' +
+                '</div>';
+            })
+            .getTeacherDashboardData();
+        }
+      }
+    }
+
+    function hideAllViews() {
+      ['viewHome', 'viewIdentity', 'viewWorksheet', 'viewResult', 'viewReflection', 'viewTeacher'].forEach(function(id) {
+        var el = document.getElementById(id);
+        if (el) el.classList.add('hidden');
+      });
+    }
+  </script>
+</body>
+</html>
